@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wandful — Privacy Policy</title>
+<style>
+  body { margin: 0; background: #0e0a1c; color: #f4f1ff; font: 16px/1.7 system-ui, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 56px 24px 80px; }
+  h1 { font-size: 30px; letter-spacing: -.015em; } h2 { font-size: 18px; margin-top: 36px; color: #c4b5fd; }
+  p, li { color: #b9b0d9; }
+  a { color: #a78bfa; }
+  .up { color: #8d81b8; font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="up"><a href="/wandful/">← wandful.io</a></p>
+  <h1>🪄 Wandful — Privacy Policy</h1>
+  <p><em>Last updated: September 3, 2026</em></p>
+
+  <h2>The short version</h2>
+  <p>Wandful collects nothing. Your spells, your API key, and your settings live in your browser's local storage on your machine. We operate no accounts, no analytics, and no server that sees your browsing.</p>
+
+  <h2>What Wandful stores, and where</h2>
+  <ul>
+    <li><strong>Spells</strong> (your saved edits: selectors, a text fingerprint of the target element, your intent text, optional trimmed HTML samples, and the generated CSS) are stored in <code>chrome.storage.local</code> on your device. A slim index (site, intent, on/off state) syncs via your browser's built-in <code>chrome.storage.sync</code> if you are signed into Chrome — that is Google's infrastructure, not ours.</li>
+    <li><strong>Your AI API key</strong>, if you add one, is stored locally and sent only to the provider you chose (OpenAI, Anthropic, or OpenRouter) when you cast a spell. Wandful's publisher never sees it and never proxies it.</li>
+  </ul>
+
+  <h2>What leaves your machine</h2>
+  <ul>
+    <li>If you use <strong>bring-your-own-key</strong>: the circled elements' trimmed HTML samples, a computed-style digest, and your intent text are sent directly from your browser to your chosen AI provider to generate CSS. That provider's privacy policy then applies.</li>
+    <li>If you use the <strong>built-in recipes and heuristics</strong>: nothing leaves your machine at all.</li>
+    <li>Wandful's publisher collects no telemetry, no crash reports and no usage statistics.</li>
+  </ul>
+
+  <h2>Permissions</h2>
+  <p>Wandful asks for <code>activeTab</code> (so the wand can read the page when you invoke it), <code>scripting</code> and <code>storage</code>. Host permissions are requested <strong>per site, only when you first cast a spell on that site</strong> — never for all sites at install. Optional advanced JavaScript spells use Chrome's user-scripts switch, which you control.</p>
+
+  <h2>Data sharing and sale</h2>
+  <p>We do not sell, transfer, or use your data for any purpose unrelated to Wandful's single purpose, and we do not use it to determine creditworthiness. There is no data to sell: it never reaches us.</p>
+
+  <h2>Contact</h2>
+  <p>Questions or deletion requests (delete everything from the extension's settings page): kiltrokills666@gmail.com.</p>
+</main>
+</body>
+</html>
