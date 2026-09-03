@@ -3,7 +3,7 @@
   "name": "Wandful — circle it, change it, it sticks",
   "short_name": "Wandful",
   "version": "0.1.0",
-  "description": "Circle any element on any site, say the change in plain English, and it applies live and persists. Bring your own AI key, or use built-in recipes free.",
+  "description": "Circle any element on any site, say the change in plain English, and it sticks. Free recipes, or bring your own AI key.",
   "permissions": ["activeTab", "scripting", "storage", "unlimitedStorage"],
   "optional_host_permissions": ["http://*/*", "https://*/*"],
   "host_permissions": [
