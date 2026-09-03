@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Wandful — settings</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { font: 14px/1.5 system-ui, sans-serif; background: #0e0a1c; color: #f4f1ff; max-width: 640px; margin: 0 auto; padding: 32px 20px; }
+    h1 { font-size: 20px; } h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: #8d81b8; margin-top: 32px; }
+    label { display: block; margin: 12px 0 4px; font-weight: 600; }
+    input, select { width: 100%; box-sizing: border-box; background: #171129; color: #fff; border: 1px solid #3c2d68; border-radius: 9px; padding: 9px 10px; font: inherit; }
+    input:focus, select:focus { outline: none; border-color: #8b5cf6; }
+    .row { display: flex; gap: 10px; margin-top: 14px; }
+    button { font: inherit; cursor: pointer; background: #7c3aed; color: #fff; border: 0; border-radius: 9px; padding: 9px 16px; font-weight: 600; }
+    button.ghost { background: #2b1d55; color: #ddd6fe; border: 1px solid #7c3aed; }
+    button.danger { background: #7f1d1d; }
+    .hint { color: #8d81b8; font-size: 12px; margin-top: 6px; }
+    #status { margin-left: 10px; color: #a7f3d0; }
+    .sites { font-size: 12px; color: #8d81b8; }
+    code { background: #171129; padding: 2px 5px; border-radius: 5px; }
+    a { color: #a78bfa; }
+  </style>
+</head>
+<body>
+  <h1>🪄 Wandful — settings</h1>
+  <p>Wandful works out of the box with built-in recipes and plain-English “hide / blur / enlarge” casts — no account, no key. Add your own AI key to cast <em>any</em> change you can describe.</p>
+
+  <h2>Bring your own AI key</h2>
+  <label for="provider">Provider</label>
+  <select id="provider">
+    <option value="openai">OpenAI</option>
+    <option value="anthropic">Anthropic</option>
+    <option value="openrouter">OpenRouter</option>
+  </select>
+  <label for="key">API key (stored locally in your browser, never sent anywhere but the provider)</label>
+  <input id="key" type="password" placeholder="sk-…" autocomplete="off" />
+  <label for="model">Model (optional)</label>
+  <input id="model" type="text" placeholder="default: gpt-4o-mini / claude-haiku-4-5" />
+  <div class="row">
+    <button id="save">Save</button>
+    <button id="test" class="ghost">Test key</button>
+    <span id="status"></span>
+  </div>
+  <p class="hint">Your key lives in <code>chrome.storage.local</code> on this machine. Wandful is BYOK-first: free tier stays free, we never proxy your prompts.</p>
+
+  <h2>Wanded sites</h2>
+  <p class="sites" id="sites">…</p>
+
+  <h2>Data</h2>
+  <div class="row">
+    <button id="export" class="ghost">Export all spells (JSON)</button>
+    <button id="wipe" class="danger">Delete everything</button>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

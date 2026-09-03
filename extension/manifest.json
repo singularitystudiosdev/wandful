@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Wandful — circle it, change it, it sticks",
+  "short_name": "Wandful",
+  "version": "0.1.0",
+  "description": "Circle any element on any site, say the change in plain English, and it applies live and persists. Bring your own AI key, or use built-in recipes free.",
+  "permissions": ["activeTab", "scripting", "storage", "unlimitedStorage"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "host_permissions": [
+    "https://api.openai.com/*",
+    "https://api.anthropic.com/*",
+    "https://openrouter.ai/*"
+  ],
+  "background": { "service_worker": "sw/service-worker.js", "type": "module" },
+  "action": { "default_popup": "ui/popup.html", "default_title": "Wandful" },
+  "options_page": "ui/options.html",
+  "commands": {
+    "start-cast": {
+      "suggested_key": { "default": "Alt+Shift+W" },
+      "description": "Start a Cast (circle what you want to change)"
+    }
+  },
+  "icons": {
+    "16": "icons/wandful-16.png",
+    "48": "icons/wandful-48.png",
+    "128": "icons/wandful-128.png"
+  }
+}

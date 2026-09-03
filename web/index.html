@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wandful — circle it. say the change. it sticks.</title>
+<meta name="description" content="A browser extension that lets you circle any element on any website, describe the change in plain English, and keep it. No code, no admin, no IT ticket. Bring your own AI key — or use free recipes." />
+<style>
+  :root {
+    --bg: #0e0a1c; --bg2: #150f2b; --panel: #171129; --line: #2b2049;
+    --ink: #f4f1ff; --mut: #a89ec9; --dim: #8d81b8;
+    --violet: #7c3aed; --violet2: #a78bfa; --lav: #c4b5fd;
+    --radius: 16px;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, sans-serif; }
+  a { color: var(--violet2); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+  header.nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(12px); background: rgba(14,10,28,.75); border-bottom: 1px solid var(--line); }
+  header.nav .wrap { display: flex; align-items: center; gap: 20px; height: 60px; }
+  .logo { font-weight: 800; font-size: 18px; text-decoration: none; color: var(--ink); }
+  .navlinks { margin-left: auto; display: flex; gap: 22px; align-items: center; }
+  .navlinks a { color: var(--mut); text-decoration: none; font-size: 14px; }
+  .navlinks a:hover { color: var(--ink); }
+  .btn { display: inline-block; background: var(--violet); color: #fff; font-weight: 700; text-decoration: none; padding: 11px 20px; border-radius: 11px; border: 0; cursor: pointer; font-size: 15px; }
+  .btn:hover { background: #8b5cf6; }
+  .btn.ghost { background: transparent; color: var(--lav); border: 1px solid var(--violet); }
+  .btn.ghost:hover { background: rgba(124,58,237,.15); }
+
+  .hero { padding: 84px 0 40px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+  .hero h1 { font-size: clamp(34px, 5vw, 54px); line-height: 1.08; margin: 0 0 18px; letter-spacing: -.02em; }
+  .hero h1 em { font-style: normal; color: var(--violet2); }
+  .hero p.lead { font-size: 19px; color: var(--mut); margin: 0 0 28px; }
+  .cta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .note { font-size: 13px; color: var(--dim); }
+
+  /* demo card: an SVG "feed" that gets lassoed */
+  .demo { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .demo svg { display: block; width: 100%; height: auto; }
+  .demo .cap { text-align: center; color: var(--dim); font-size: 13px; margin-top: 12px; }
+
+  section { padding: 64px 0; }
+  h2 { font-size: clamp(26px, 3.4vw, 36px); letter-spacing: -.015em; margin: 0 0 10px; }
+  .sub { color: var(--mut); max-width: 640px; margin: 0 0 36px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .card .n { color: var(--violet2); font-weight: 800; font-size: 13px; letter-spacing: .1em; }
+  .card h3 { margin: 8px 0 6px; font-size: 17px; }
+  .card p { margin: 0; color: var(--mut); font-size: 14.5px; }
+
+  table.pricing { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  table.pricing th, table.pricing td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--line); font-size: 15px; }
+  table.pricing th { background: var(--bg2); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); }
+  table.pricing tr:last-child td { border-bottom: 0; }
+  .price { font-size: 26px; font-weight: 800; color: var(--lav); }
+  .price small { font-size: 13px; color: var(--dim); font-weight: 500; }
+
+  details { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { color: var(--mut); font-size: 14.5px; margin: 10px 0 0; }
+
+  .install-box { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+  .install-box ol { color: var(--mut); margin: 10px 0 0; padding-left: 20px; }
+  .install-box code { background: #0e0a1c; border: 1px solid var(--line); padding: 2px 6px; border-radius: 6px; font-size: 13px; }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--dim); font-size: 13.5px; }
+  footer .wrap { display: flex; gap: 20px; flex-wrap: wrap; }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; padding-top: 56px; }
+    .grid3 { grid-template-columns: 1fr; }
+    .navlinks a:not(.btn) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="logo" href="#">🪄 Wandful</a>
+    <nav class="navlinks">
+      <a href="#how">How it works</a>
+      <a href="#recipes">Recipes</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#install" class="btn">Install free</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>Circle it. Say the change.<br/><em>It sticks.</em></h1>
+      <p class="lead">Wandful is a browser extension that reshapes any website to your taste. Draw a circle around what bothers you, say what should happen in plain English — the change applies instantly and survives every reload.</p>
+      <div class="cta">
+        <a class="btn" href="#install">Install free — 30 seconds</a>
+        <a class="btn ghost" href="#how">See how it works</a>
+      </div>
+      <p class="note" style="margin-top:16px">No account. No admin. No IT ticket. Your AI key or ours — the free tier never expires.</p>
+    </div>
+    <div class="demo" aria-label="Animated demo: a lasso circles three video cards which then disappear">
+      <svg viewBox="0 0 420 300" role="img">
+        <rect width="420" height="300" rx="12" fill="#0e0a1c"/>
+        <rect x="16" y="14" width="180" height="12" rx="6" fill="#3c2d68"/>
+        <rect x="16" y="34" width="120" height="8" rx="4" fill="#241a44"/>
+        <!-- grid of "video" cards -->
+        <g id="cards">
+          <g class="c"><rect x="20" y="60" width="120" height="68" rx="8" fill="#241a44"/><rect x="20" y="134" width="90" height="8" rx="4" fill="#3c2d68"/></g>
+          <g class="c"><rect x="150" y="60" width="120" height="68" rx="8" fill="#241a44"/><rect x="150" y="134" width="90" height="8" rx="4" fill="#3c2d68"/></g>
+          <g class="c shorts"><rect x="280" y="60" width="120" height="68" rx="8" fill="#4c1d95"/><rect x="280" y="134" width="90" height="8" rx="4" fill="#3c2d68"/><text x="340" y="100" fill="#ddd6fe" font-size="13" text-anchor="middle">Shorts</text></g>
+          <g class="c"><rect x="20" y="160" width="120" height="68" rx="8" fill="#241a44"/><rect x="20" y="234" width="90" height="8" rx="4" fill="#3c2d68"/></g>
+          <g class="c shorts"><rect x="150" y="160" width="120" height="68" rx="8" fill="#4c1d95"/><rect x="150" y="234" width="90" height="8" rx="4" fill="#3c2d68"/><text x="210" y="200" fill="#ddd6fe" font-size="13" text-anchor="middle">Shorts</text></g>
+          <g class="c"><rect x="280" y="160" width="120" height="68" rx="8" fill="#241a44"/><rect x="280" y="234" width="90" height="8" rx="4" fill="#3c2d68"/></g>
+        </g>
+        <!-- lasso stroke animates around the two shorts cards, then they fade -->
+        <path class="lasso" d="M 140 45 C 260 30, 415 40, 412 100 C 410 150, 300 250, 145 245 C 90 240, 95 200, 140 190 C 220 170, 300 190, 305 140 C 310 95, 220 60, 140 45 Z"
+              fill="none" stroke="#a78bfa" stroke-width="3" stroke-dasharray="7 6" stroke-linecap="round"/>
+        <circle class="wand-tip" r="5" fill="#fff"/>
+      </svg>
+      <div class="cap">“remove Shorts from my recommendations” — 2 targets · cast ✓</div>
+    </div>
+  </div>
+</div>
+
+<section id="how">
+  <div class="wrap">
+    <h2>Three steps between an annoyance and a fix</h2>
+    <p class="sub">Wandful compiles your circle plus your words into a small CSS spell scoped to the site you're on. You can inspect, pause or delete every spell — nothing happens that you didn't draw.</p>
+    <div class="grid3">
+      <div class="card"><div class="n">01 — CAST</div><h3>Press the wand</h3><p>Click the Wandful icon (or Alt+Shift+W) on any site. The page dims; your cursor becomes a lasso.</p></div>
+      <div class="card"><div class="n">02 — CIRCLE</div><h3>Circle what you mean</h3><p>Draw around one element or slash through a whole row. Overlap the lasso to narrow: 40 targets → 12 → exactly the ones you want. Wandful offers “…and 28 more like them?” when a pattern is clear.</p></div>
+      <div class="card"><div class="n">03 — SAY IT</div><h3>Describe the change</h3><p>“Remove all of these.” “Make this bigger.” “Blur this until I click.” Cast — it applies instantly and sticks on every reload. Manage everything in your Spellbook.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="recipes">
+  <div class="wrap">
+    <h2>Start from a recipe</h2>
+    <p class="sub">Common fixes ship one click away — no key, no casting. And because spells export as JSON, what you invent is shareable the moment you make it.</p>
+    <div class="grid3">
+      <div class="card"><h3>YouTube — Remove Shorts</h3><p>Hides Shorts shelves, tabs and nav entries. The most-circled request on the internet, fixed in one click.</p></div>
+      <div class="card"><h3>Google — Remove sponsored results</h3><p>Strips the ad blocks out of search results.</p></div>
+      <div class="card"><h3>Salesforce — Hide “Ask Agentforce”</h3><p>The button Salesforce won't let you dismiss. Personal UI relief, no admin, no ticket.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <h2>Pricing</h2>
+    <p class="sub">The free tier is a real product, not a trial: unlimited spells, forever. Pro exists for one reason — you shouldn't need your own API key.</p>
+    <table class="pricing">
+      <tr><th></th><th>Free</th><th>Pro</th></tr>
+      <tr><td><strong>Price</strong></td><td class="price">$0 <small>forever</small></td><td class="price">$4<small>/mo · or $39/yr</small></td></tr>
+      <tr><td>Spells (saved, persistent edits)</td><td>Unlimited</td><td>Unlimited</td></tr>
+      <tr><td>Recipe library</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Circle-and-describe casting</td><td>✓ built-in recipes</td><td>✓ + plain-English anything</td></tr>
+      <tr><td>AI inference</td><td>Bring your own key (OpenAI, Anthropic, OpenRouter)</td><td><strong>Included — no key, no setup</strong></td></tr>
+      <tr><td>Export &amp; share spells</td><td>✓ JSON</td><td>✓ + curated spell library</td></tr>
+    </table>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <h2>Questions</h2>
+    <details open><summary>Is Wandful free?</summary><p>Yes. Unlimited spells, the recipe library and circle-and-describe casting with built-in recipes are free forever. Pro ($4/mo) adds hosted AI inference so you don't need your own API key.</p></details>
+    <details><summary>How is this different from Tampermonkey or Stylus?</summary><p>Those are excellent tools for people who write code. Wandful is for people who don't: you circle what you mean instead of writing selectors, and spells are stored with their intent and a fingerprint — when a site redesigns, a spell can be re-cast with one click instead of silently dying.</p></details>
+    <details><summary>What does Wandful have access to?</summary><p>Only sites you've cast on, and only after you grant that site. We never request “all sites” at install. Your API key (if you add one) stays in your browser's local storage and is sent only to your chosen provider. We run no proxy in the free tier.</p></details>
+    <details><summary>Can a spell run JavaScript on pages?</summary><p>Only if you opt in: the Advanced tier uses Chrome's user-scripts switch, clearly labeled per spell. By default spells are pure CSS — inert by construction.</p></details>
+    <details><summary>Where do my spells live?</summary><p>On your machine, in Chrome's local storage. Export them as JSON any time from the Spellbook or settings.</p></details>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>Install Wandful</h2>
+    <div class="install-box">
+      <p><strong>Chrome, Edge, Brave, Arc, Opera, Vivaldi</strong> (any Chromium browser):</p>
+      <ol>
+        <li>Download <a href="/wandful-extension.zip">wandful-extension.zip</a> and unzip it.</li>
+        <li>Open <code>chrome://extensions</code>, enable <strong>Developer mode</strong> (top right).</li>
+        <li>Click <strong>Load unpacked</strong> and pick the unzipped folder.</li>
+        <li>Open any website, press the 🪄 icon — or Alt+Shift+W — and cast your first spell.</li>
+      </ol>
+      <p class="note" style="margin-top:14px">Chrome Web Store listing is in review; load-unpacked works identically today.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Wandful</span>
+    <span>Circle it. Say the change. It sticks.</span>
+    <span style="margin-left:auto">Built with a wand, not a roadmap.</span>
+  </div>
+</footer>
+
+<script>
+  // Hero demo: trace the lasso once, then fade the two Shorts cards, loop.
+  const lasso = document.querySelector('.lasso');
+  const tip = document.querySelector('.wand-tip');
+  const shorts = document.querySelectorAll('.shorts');
+  const len = lasso.getTotalLength();
+  lasso.style.strokeDasharray = '7 6';
+  function animate(ts) {
+    const t = ((ts / 3400) % 1);
+    const draw = Math.min(1, t * 1.6);
+    const fade = t > 0.55 ? Math.min(1, (t - 0.55) * 2.2) : 0;
+    lasso.style.opacity = t > 0.9 ? 1 - (t - 0.9) * 10 : 1;
+    tip.setAttribute('cx', lasso.getPointAtLength(draw * len).x);
+    tip.setAttribute('cy', lasso.getPointAtLength(draw * len).y);
+    tip.style.opacity = draw < 1 ? 1 : 0;
+    shorts.forEach(g => g.style.opacity = 1 - fade * 0.92);
+    requestAnimationFrame(animate);
+  }
+  // trace-in: reveal the lasso by drawing it
+  lasso.style.strokeDashoffset = 0;
+  requestAnimationFrame(animate);
+</script>
+</body>
+</html>
